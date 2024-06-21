@@ -8,7 +8,9 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import dev.stas.testflowxml.databinding.ActivityMainBinding
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
@@ -38,14 +40,17 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun observeViewModel() {
-        viewModel.results.observe(this, Observer { results ->
-            updateResultsUI(results)
-        })
+        lifecycleScope.launch {
+            viewModel.results.collect { results ->
+                updateResultsUI(results)
+            }
+        }
     }
 
     private fun updateResultsUI(results: List<Pair<Int, List<Int>>>) {
-        binding.resultsContainer.removeAllViews()
-        results.forEach { (inputValue, resultList) ->
+        if (results.isNotEmpty()) {
+            val (inputValue, resultList) = results.last()
+            binding.resultsContainer.removeAllViews()
             val inputTextView = TextView(this).apply {
                 text = "Введенное количество: $inputValue"
             }

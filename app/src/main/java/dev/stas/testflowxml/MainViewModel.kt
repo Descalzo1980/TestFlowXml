@@ -6,27 +6,26 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 
 class MainViewModel : ViewModel() {
 
-    private val _results = MutableLiveData<List<Pair<Int, List<Int>>>>()
-    val results: LiveData<List<Pair<Int, List<Int>>>> = _results
+    private val _results = MutableStateFlow<List<Pair<Int, List<Int>>>>(emptyList())
+    val results: StateFlow<List<Pair<Int, List<Int>>>> = _results
 
     fun startSummation(n: Int) {
-        val resultList = mutableListOf<Int>()
-        val currentResults = _results.value?.toMutableList() ?: mutableListOf()
-        currentResults.add(n to resultList)
-        _results.value = currentResults
-
         viewModelScope.launch {
-            combineFlowSummator(n).collect { number ->
-                resultList.add(number)
-                _results.value = _results.value?.map {
-                    if (it.first == n) n to resultList else it
+            val resultList = mutableListOf<Int>()
+            combineFlowSummator(n)
+                .collect { number ->
+                    resultList.add(number)
+                    _results.value = _results.value.toMutableList().apply {
+                        add(n to resultList.toList())
+                    }
                 }
-            }
         }
     }
 
@@ -36,7 +35,7 @@ class MainViewModel : ViewModel() {
             for (i in 1..n) {
                 currentSum += i
                 emit(currentSum)
-                delay(100L)
+                kotlinx.coroutines.delay(100L)
             }
         }
     }
