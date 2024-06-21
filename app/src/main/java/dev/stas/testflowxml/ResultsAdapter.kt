@@ -29,7 +29,7 @@ class ResultsAdapter : ListAdapter<CalculationResult, ResultsAdapter.ResultViewH
     class ResultsDiffCallback : DiffUtil.ItemCallback<CalculationResult>() {
 
         override fun areItemsTheSame(oldItem: CalculationResult, newItem: CalculationResult): Boolean {
-            return oldItem.inputValue == newItem.inputValue
+            return oldItem.id == newItem.id
         }
 
         override fun areContentsTheSame(oldItem: CalculationResult, newItem: CalculationResult): Boolean {
