@@ -12,10 +12,11 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
+
 class MainViewModel : ViewModel() {
 
-    private val _results = MutableStateFlow<List<Pair<Int, List<Int>>>>(emptyList())
-    val results: StateFlow<List<Pair<Int, List<Int>>>> = _results
+    private val _results = MutableStateFlow<List<CalculationResult>>(emptyList())
+    val results: StateFlow<List<CalculationResult>> = _results
 
     fun startSummation(n: Int) {
         viewModelScope.launch {
@@ -34,17 +35,17 @@ class MainViewModel : ViewModel() {
     }
 
     private fun addResult(result: Pair<Int, Int>) {
-        val updatedResults = _results.value.toMutableList()
-        val existing = updatedResults.find { it.first == result.first }
-        if (existing == null) {
-            updatedResults.add(result.first to listOf(result.second))
+        val currentResults = _results.value.toMutableList()
+        val existingIndex = currentResults.indexOfFirst { it.inputValue == result.first }
+        if (existingIndex == -1) {
+            currentResults.add(CalculationResult(result.first, listOf(result.second)))
         } else {
-            val index = updatedResults.indexOf(existing)
-            val newValues = existing.second.toMutableList()
-            newValues.add(result.second)
-            updatedResults[index] = result.first to newValues
+            val existingResult = currentResults[existingIndex]
+            val updatedList = existingResult.resultList.toMutableList()
+            updatedList.add(result.second)
+            currentResults[existingIndex] = existingResult.copy(resultList = updatedList)
         }
-        _results.value = updatedResults
+        _results.value = currentResults.toList()
     }
 
     private fun combineFlowSummator(n: Int): Flow<Int> {
@@ -58,3 +59,8 @@ class MainViewModel : ViewModel() {
         }
     }
 }
+
+data class CalculationResult(
+    val inputValue: Int,
+    val resultList: List<Int>
+)
