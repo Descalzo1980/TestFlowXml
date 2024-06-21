@@ -4,9 +4,12 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import dev.stas.testflowxml.databinding.ActivityMainBinding
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
@@ -47,9 +50,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun observeViewModel() {
-        lifecycleScope.launchWhenStarted {
-            viewModel.results.collect { results ->
-                resultsAdapter.submitList(results)
+        lifecycleScope.launch {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                viewModel.results.collect { results ->
+                    resultsAdapter.submitList(results)
+                }
             }
         }
     }
