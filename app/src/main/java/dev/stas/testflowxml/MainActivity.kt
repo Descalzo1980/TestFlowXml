@@ -4,17 +4,11 @@ import android.os.Bundle
 import android.widget.LinearLayout
 import android.widget.Space
 import android.widget.TextView
-import androidx.activity.enableEdgeToEdge
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Observer
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import dev.stas.testflowxml.databinding.ActivityMainBinding
-import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
@@ -33,10 +27,12 @@ class MainActivity : AppCompatActivity() {
     private fun setupViews() {
         binding.startButton.setOnClickListener {
             val inputText = binding.inputField.text.toString()
-            if (inputText.all { it.isDigit() }) {
+            if (inputText.isNotBlank() && inputText.all { it.isDigit() }) {
                 val n = inputText.toInt()
                 binding.inputField.setText("")
                 viewModel.startSummation(n)
+            } else {
+                Toast.makeText(this, "Please enter a valid number", Toast.LENGTH_SHORT).show()
             }
         }
     }
