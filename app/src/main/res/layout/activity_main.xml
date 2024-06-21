@@ -28,10 +28,9 @@
         android:text="Start"
         android:layout_marginTop="8dp" />
 
-    <LinearLayout
-        android:id="@+id/resultsContainer"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginTop="8dp" />
+        tools:listitem="@layout/item_result" />
 </LinearLayout>

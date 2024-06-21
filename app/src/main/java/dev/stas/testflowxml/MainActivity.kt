@@ -1,29 +1,36 @@
 package dev.stas.testflowxml
 
 import android.os.Bundle
-import android.widget.LinearLayout
-import android.widget.Space
-import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
 import dev.stas.testflowxml.databinding.ActivityMainBinding
-import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private val viewModel: MainViewModel by viewModels()
+    private lateinit var resultsAdapter: ResultsAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setupRecyclerView()
         setupViews()
         observeViewModel()
+    }
+
+    private fun setupRecyclerView() {
+        resultsAdapter = ResultsAdapter()
+        binding.recyclerView.apply {
+            adapter = resultsAdapter
+            layoutManager = LinearLayoutManager(this@MainActivity)
+            animation = null
+        }
     }
 
     private fun setupViews() {
@@ -40,37 +47,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun observeViewModel() {
-        lifecycleScope.launch {
+        lifecycleScope.launchWhenStarted {
             viewModel.results.collect { results ->
-                updateResultsUI(results)
+                resultsAdapter.submitList(results)
             }
         }
-    }
-
-    private fun updateResultsUI(results: List<Pair<Int, List<Int>>>) {
-        if (results.isNotEmpty()) {
-            val (inputValue, resultList) = results.last()
-            binding.resultsContainer.removeAllViews()
-            val inputTextView = TextView(this).apply {
-                text = "Введенное количество: $inputValue"
-            }
-            binding.resultsContainer.addView(inputTextView)
-
-            val resultTextView = TextView(this).apply {
-                text = "Результат: ${resultList.joinToString(" ")}"
-            }
-            binding.resultsContainer.addView(resultTextView)
-
-            binding.resultsContainer.addView(Space(this).apply {
-                layoutParams = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    8.dpToPx()
-                )
-            })
-        }
-    }
-
-    private fun Int.dpToPx(): Int {
-        return (this * resources.displayMetrics.density).toInt()
     }
 }
